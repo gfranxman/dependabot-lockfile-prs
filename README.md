@@ -14,6 +14,7 @@ Run the script from a checkout of the target repo:
 
 ```
 dependabot-lockfile-prs.sh            # report only
+dependabot-lockfile-prs.sh --risky    # report only the PRs that are not low-risk
 dependabot-lockfile-prs.sh --merge    # approve and squash merge the low-risk set
 ```
 

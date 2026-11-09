@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Find and optionally merge the low-risk Dependabot PRs.
 #
-# Usage: scripts/dependabot-lockfile-prs.sh [--merge]
+# Usage: scripts/dependabot-lockfile-prs.sh [--merge|--risky]
 #
 # A candidate is an open Dependabot PR that changes only dependency files:
 # requirements .in and .txt, package.json, or a lock file. Each candidate is
@@ -11,7 +11,8 @@
 #   - a backend bump does not touch a package that a .in file pins with ==
 #     unless the PR also updates that .in (make compile would revert it)
 #
-# Without --merge, print every candidate with its verdict. With --merge,
+# Without a flag, print every candidate with its verdict. With --risky, print
+# only the candidates that are not low-risk. With --merge,
 # approve and squash merge each low-risk PR in turn, waiting for Dependabot
 # to rebase the next one and for CI to pass before continuing.
 #
@@ -20,7 +21,7 @@
 # files live somewhere other than backend/requirements.
 set -euo pipefail
 
-merge=${1:-}
+flag=${1:-}
 req_dir=${REQ_DIR:-backend/requirements}
 # jq regex, so dots are escaped with a doubled backslash
 dep_files='(\\.in|\\.txt|package\\.json|package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml)$'
@@ -93,9 +94,10 @@ wait_and_merge() {
 }
 
 rows=$(candidates)
+[ "$flag" = "--risky" ] && rows=$(awk -F'\t' '$2!="low-risk"' <<<"$rows")
 printf 'PR\tverdict\tcompile\ttitle\n%s\n' "$rows" | column -t -s $'\t'
 
-[ "$merge" = "--merge" ] || exit 0
+[ "$flag" = "--merge" ] || exit 0
 
 echo
 low=$(awk -F'\t' '$2=="low-risk"{print $1}' <<<"$rows")

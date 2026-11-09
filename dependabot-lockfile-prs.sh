@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Find and optionally merge the low-risk Dependabot PRs.
 #
-# Usage: scripts/dependabot-lockfile-prs.sh [--merge|--risky]
+# Usage: dependabot-lockfile-prs.sh [--merge|--risky]
 #
 # A candidate is an open Dependabot PR that changes only dependency files:
 # requirements .in and .txt, package.json, or a lock file. Each candidate is
@@ -9,7 +9,7 @@
 #   - CI has no failing check and nothing pending
 #   - the bump is not a major version change
 #   - a backend bump does not touch a package that a .in file pins with ==
-#     unless the PR also updates that .in (make compile would revert it)
+#     unless the PR also updates that .in (pip-compile would revert it)
 #
 # Without a flag, print every candidate with its verdict. With --risky, print
 # only the candidates that are not low-risk. With --merge,
@@ -27,7 +27,7 @@ req_dir=${REQ_DIR:-backend/requirements}
 dep_files='(\\.in|\\.txt|package\\.json|package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml)$'
 
 compile_note() {
-  # $1 package, $2 changed files. Says whether `make compile` keeps the bump.
+  # $1 package, $2 changed files. Says whether pip-compile keeps the bump.
   local pkg=$1 files=$2 spec
   case "$files" in *"$req_dir"*) ;; *) echo "-"; return ;; esac
   spec=$(grep -hiE "^${pkg}(\[[^]]*\])?\s*(==|$|\s|#)" "$req_dir"/*.in 2>/dev/null | head -1 || true)

@@ -61,3 +61,7 @@ squash merges it. It skips a PR that Dependabot closes mid-run, one that
 starts failing, or one that stays unmergeable for twenty minutes.
 
 The approval is yours, so read the report first.
+
+## License
+
+MIT. See LICENSE.
